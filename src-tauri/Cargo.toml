@@ -1,0 +1,21 @@
+[package]
+name = "lector"
+version = "0.1.0"
+description = "Lightweight PDF read-aloud app"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+# Native ONNX Runtime for the Kokoro neural voice (multi-threaded, much faster than WebAssembly)
+ort = { version = "=2.0.0-rc.15", default-features = false, features = ["std", "download-binaries", "tls-native", "copy-dylibs", "api-31"] }
+
+# Small, fast release binary
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

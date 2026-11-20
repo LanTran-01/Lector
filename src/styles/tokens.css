@@ -1,0 +1,94 @@
+@font-face {
+  font-family: "Barlow";
+  font-weight: 300;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource/barlow/files/barlow-latin-300-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow";
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource/barlow/files/barlow-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow";
+  font-weight: 500;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource/barlow/files/barlow-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Barlow";
+  font-weight: 600;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource/barlow/files/barlow-latin-600-normal.woff2") format("woff2");
+}
+
+/* Light (default) */
+:root {
+  --bg: #ffffff;
+  --bg-elev: #ffffff;
+  --bg-sunk: #f4f4f4;
+  --fg: #0a0a0a;
+  --fg-muted: #6b6b6b;
+  --line: rgba(0, 0, 0, 0.12);
+  --line-strong: rgba(0, 0, 0, 0.6);
+  --hover: rgba(0, 0, 0, 0.05);
+  --glass: rgba(255, 255, 255, 0.94);
+  --page-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 32px rgba(0, 0, 0, 0.08);
+  --hl: rgba(62, 106, 225, 0.22);
+  --hl-edge: rgba(62, 106, 225, 0.9);
+  --primary-bg: #0a0a0a;
+  --primary-fg: #ffffff;
+  --page-filter: none;
+
+  --font: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --track: 0.2em;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 200ms;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000;
+    --bg-elev: #0b0b0b;
+    --bg-sunk: #111111;
+    --fg: #ffffff;
+    --fg-muted: #8a8a8a;
+    --line: rgba(255, 255, 255, 0.12);
+    --line-strong: rgba(255, 255, 255, 0.7);
+    --hover: rgba(255, 255, 255, 0.07);
+    --glass: rgba(10, 10, 10, 0.9);
+    --page-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --hl: rgba(110, 150, 255, 0.3);
+    --hl-edge: rgba(140, 170, 255, 0.95);
+    --primary-bg: #ffffff;
+    --primary-fg: #000000;
+    --page-filter: invert(0.9) hue-rotate(180deg);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --bg-elev: #0b0b0b;
+  --bg-sunk: #111111;
+  --fg: #ffffff;
+  --fg-muted: #8a8a8a;
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.7);
+  --hover: rgba(255, 255, 255, 0.07);
+  --glass: rgba(10, 10, 10, 0.9);
+  --page-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --hl: rgba(110, 150, 255, 0.3);
+  --hl-edge: rgba(140, 170, 255, 0.95);
+  --primary-bg: #ffffff;
+  --primary-fg: #000000;
+  --page-filter: invert(0.9) hue-rotate(180deg);
+  color-scheme: dark;
+}
+
+/* User turned off page dimming */
+:root[data-dim-pages="off"] {
+  --page-filter: none;
+}

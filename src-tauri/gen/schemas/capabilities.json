@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Lector only needs the core window APIs; files are read in the web view.","local":true,"windows":["main"],"permissions":["core:default"]}}
