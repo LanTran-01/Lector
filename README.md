@@ -36,7 +36,8 @@ npm run tauri dev    # the real desktop window
 ## Building the Windows installer
 
 - **On a Windows PC:** run `npm run tauri build`. The installer appears in `src-tauri/target/release/bundle/nsis/`.
-- **From a Mac:** push the project to GitHub. Then either run the **Build Windows** workflow from the Actions tab, or push a tag such as `v0.1.0`. The workflow uploads `lector-windows` as an artifact containing the installer and the standalone `lector.exe`.
+- **From a Mac:** push the project to GitHub. Then either run the **Build Windows** workflow from the Actions tab, or push a tag such as `v0.1.0`. The workflow installs and launches the app as a check, then uploads two artifacts: `lector-windows-installer` (the setup `.exe`) and `lector-windows-portable` (the app plus its runtime DLLs, no install needed).
+- The Windows build ships the Microsoft Visual C++ runtime DLLs next to the app (`scripts/copy-vcruntime.mjs`), so Lector also starts on PCs without the VC++ Redistributable.
 
 ## Project layout
 
