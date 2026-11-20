@@ -131,19 +131,36 @@ export function buildChunks(contents: TextContent[], boxes: PageBox[] = []): Chu
   const pageLines = pages.map(linesOf);
   const skipped = findSkipped(pages, pageLines, boxes);
 
-  let text = "";
+  // The book's text is collected as pieces and joined once at the end. Never inspect
+  // or re-slice the growing string itself: that is quadratic and froze long books.
+  const pieces: string[] = [];
+  let len = 0; // total length so far
+  let lastChar = ""; // last character appended
+  const isSpace = (c: string) => c === " " || c === "\n" || c === "\t";
+  const append = (piece: string) => {
+    if (!piece) return;
+    pieces.push(piece);
+    len += piece.length;
+    lastChar = piece[piece.length - 1];
+  };
+
   // Parallel arrays: character range [starts[k], ends[k]) belongs to refs[k]
   const starts: number[] = [];
   const ends: number[] = [];
   const refs: SpanRef[] = [];
 
   const pushSpace = () => {
-    if (text.length && !/\s$/.test(text)) text += " ";
+    if (len && !isSpace(lastChar)) append(" ");
   };
   // A line break (U+000A) makes Intl.Segmenter end the sentence there.
   const pushBreak = () => {
-    if (/\s$/.test(text)) text = text.slice(0, -1);
-    if (text.length) text += "\n";
+    if (!len) return;
+    if (isSpace(lastChar)) {
+      // Replace the trailing space with the break (same position, so offsets stay valid).
+      pieces[pieces.length - 1] = pieces[pieces.length - 1].slice(0, -1);
+      len--;
+    }
+    append("\n");
   };
 
   pages.forEach((items, page) => {
@@ -168,16 +185,16 @@ export function buildChunks(contents: TextContent[], boxes: PageBox[] = []): Chu
         const last = k === kept.length - 1;
         // Join words hyphenated across a line break: "infor-" + "mation"
         // (the hyphen can also be its own text item after the word)
-        const loneHyphen = /^\s*-\s*$/.test(s) && /\p{L}$/u.test(text);
+        const loneHyphen = /^\s*-\s*$/.test(s) && /\p{L}/u.test(lastChar);
         if (k === lastText && (/\p{L}-\s*$/u.test(s) || loneHyphen)) {
           s = s.replace(/-\s*$/, "");
           hyphenBreak = true;
         }
         if (s.trim()) {
-          if (/^\s/.test(s) && /\s$/.test(text)) s = s.trimStart();
-          starts.push(text.length);
-          text += s;
-          ends.push(text.length);
+          if (/^\s/.test(s) && isSpace(lastChar)) s = s.trimStart();
+          starts.push(len);
+          append(s);
+          ends.push(len);
           refs.push({ page, item });
         } else if (s) {
           pushSpace();
@@ -195,7 +212,8 @@ export function buildChunks(contents: TextContent[], boxes: PageBox[] = []): Chu
 
   // Dot leaders ("Contents ........ 4") and ellipses, cleaned before sentence splitting.
   // Replacements keep the same length so character offsets still match the spans.
-  text = text
+  const text = pieces
+    .join("")
     .replace(/(?:[ \t]*\.){3,}[ \t]*\d{1,4}\b/g, (m) => "\n" + " ".repeat(m.length - 1))
     .replace(/(?:[ \t]*\.){3,}/g, (m) => "," + " ".repeat(m.length - 1));
 

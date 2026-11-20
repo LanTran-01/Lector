@@ -214,13 +214,20 @@ async function openFile(file: File): Promise<void> {
     const loaded = await openPdf(await file.arrayBuffer(), (f) => {
       if (token !== loadToken) return;
       dropBar.style.width = `${Math.round(f * 100)}%`;
-      dropTitle.textContent = `READING ${Math.round(f * 100)}%`;
+      dropTitle.textContent = `LOADING PAGES ${Math.round(f * 100)}%`;
     });
     if (token !== loadToken) {
       void loaded.doc.loadingTask.destroy();
       return;
     }
 
+    // Let the label repaint before the (short) text preparation step.
+    dropTitle.textContent = "PREPARING TEXT";
+    await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+    if (token !== loadToken) {
+      void loaded.doc.loadingTask.destroy();
+      return;
+    }
     chunks = buildChunks(loaded.text, loaded.pages.map((p) => p.view));
     spanToChunk = new Map();
     chunks.forEach((c, i) => {
@@ -493,6 +500,18 @@ if (import.meta.env.VITE_DIAG) {
     fetch(`http://127.0.0.1:4176/diag?${encodeURIComponent(msg)}`, { mode: "no-cors" }).catch(() => {});
   };
   void (async () => {
+    // Big-document check: load a test book from the log server and time it.
+    try {
+      const t0 = performance.now();
+      const blob = await (await fetch("http://127.0.0.1:4176/book.pdf")).blob();
+      report(`book fetched ${blob.size} bytes`);
+      const watch = setInterval(() => report(`book: ${dropTitle.textContent}`), 2000);
+      await openFile(new File([blob], "book.pdf", { type: "application/pdf" }));
+      clearInterval(watch);
+      report(`book state=${app.dataset.state} sentences=${chunks.length} pages=${viewer.pageCount} in ${Math.round(performance.now() - t0)}ms`);
+    } catch (e) {
+      report(`book error ${(e as Error).message}`);
+    }
     const k = reader.kokoro;
     k.trace = (step) => report(`step ${step}`);
     document.addEventListener("securitypolicyviolation", (e) =>
